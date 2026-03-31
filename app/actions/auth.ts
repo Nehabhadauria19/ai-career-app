@@ -1,10 +1,10 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+// import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 export async function signUp(formData: FormData) {
-  const supabase = await createClient();
+//   const supabase = await createClient();
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;

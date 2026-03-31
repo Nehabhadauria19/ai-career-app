@@ -9,9 +9,10 @@ import { AnalysisResult } from '@/types';
 
 interface ResumeAnalysisProps {
   resumeText: string;
+  fileName?: string;
 }
 
-export default function ResumeAnalysis({ resumeText }: ResumeAnalysisProps) {
+export default function ResumeAnalysis({ resumeText, fileName }: ResumeAnalysisProps) {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,26 @@ export default function ResumeAnalysis({ resumeText }: ResumeAnalysisProps) {
       if (!response.ok) throw new Error(data.error);
 
       setAnalysis(data.analysis);
+
+// Auto-save to Supabase
+try {
+  const token = localStorage.getItem('token');
+await fetch('/api/save-analysis', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({
+    fileName: fileName || 'resume.pdf',
+    resumeText,
+    analysis: data.analysis,
+    roles: null,
+  }),
+});
+} catch (saveErr: unknown) {
+  console.error('Save failed:', saveErr instanceof Error ? saveErr.message : saveErr);
+}
 
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong';

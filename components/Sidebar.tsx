@@ -1,6 +1,8 @@
 'use client';
 
-import { FileText, Star, Briefcase, MessageSquare, ExternalLink } from 'lucide-react';
+import { FileText, Star, Briefcase, MessageSquare, ExternalLink, History } from 'lucide-react';
+
+
 
 interface SidebarProps {
   activeTab: string;
@@ -13,12 +15,13 @@ const navItems = [
   { id: 'analysis', label: 'AI Analysis', icon: Star },
   { id: 'roles', label: 'Role Matches', icon: Briefcase },
   { id: 'interview', label: 'Interview Prep', icon: MessageSquare },
-  { id: 'linkedin', label: 'LinkedIn Gen', icon: ExternalLink   },
+  { id: 'linkedin', label: 'LinkedIn Gen', icon: ExternalLink },
+  { id: 'history', label: 'Past Analyses', icon: History },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, fileName }: SidebarProps) {
   return (
-    <aside className="w-56 min-h-screen bg-white border-r border-slate-100 flex flex-col py-6 px-4 shrink-0">
+   <aside className="w-56 h-screen sticky top-0 bg-white border-r border-slate-100 flex flex-col py-6 px-4 shrink-0 overflow-y-auto">
 
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8 px-2">

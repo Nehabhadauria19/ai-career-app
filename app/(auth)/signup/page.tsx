@@ -1,11 +1,13 @@
-    'use client';
+'use client';
 
 import { useState } from 'react';
-import { signUp } from '@/app/actions/auth';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, UserPlus, AlertCircle } from 'lucide-react';
+import { apiRequest, setToken } from '@/lib/api';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,10 +17,23 @@ export default function SignupPage() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const result = await signUp(formData);
 
-    if (result?.error) {
-      setError(result.error);
+    try {
+      const data = await apiRequest('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({
+          fullName: formData.get('fullName'),
+          email: formData.get('email'),
+          password: formData.get('password'),
+        }),
+      });
+
+      setToken(data.token);
+      router.push('/dashboard');
+
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Signup failed');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -27,7 +42,6 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#F8F8F6] px-4">
       <div className="w-full max-w-sm">
 
-        {/* Logo */}
         <div className="flex items-center gap-2 justify-center mb-8">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#1D9E75' }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="1.5">
@@ -37,16 +51,13 @@ export default function SignupPage() {
           <span className="font-display text-lg text-slate-800">Career Coach</span>
         </div>
 
-        {/* Card */}
         <div className="bg-white border border-slate-100 rounded-2xl p-8">
           <h1 className="text-xl font-medium text-slate-800 mb-1">Create your account</h1>
           <p className="text-sm text-slate-500 mb-6">Start your AI-powered career journey</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-slate-600 mb-1.5 block">
-                Full Name
-              </label>
+              <label className="text-xs font-medium text-slate-600 mb-1.5 block">Full Name</label>
               <input
                 name="fullName"
                 type="text"
@@ -57,9 +68,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-600 mb-1.5 block">
-                Email
-              </label>
+              <label className="text-xs font-medium text-slate-600 mb-1.5 block">Email</label>
               <input
                 name="email"
                 type="email"
@@ -70,9 +79,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-600 mb-1.5 block">
-                Password
-              </label>
+              <label className="text-xs font-medium text-slate-600 mb-1.5 block">Password</label>
               <input
                 name="password"
                 type="password"

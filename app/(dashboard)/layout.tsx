@@ -1,15 +1,22 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+'use client';
 
-export default async function DashboardLayout({
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getToken } from '@/lib/api';
+
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const router = useRouter();
 
-  if (!user) redirect('/login');
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.push('/login');
+    }
+  }, [router]);
 
   return <>{children}</>;
 }

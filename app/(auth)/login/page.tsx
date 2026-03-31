@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from '@/app/actions/auth';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, LogIn, AlertCircle } from 'lucide-react';
+import { apiRequest, setToken } from '@/lib/api';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,10 +17,22 @@ export default function LoginPage() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const result = await signIn(formData);
 
-    if (result?.error) {
-      setError(result.error);
+    try {
+      const data = await apiRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: formData.get('email'),
+          password: formData.get('password'),
+        }),
+      });
+
+      setToken(data.token);
+      router.push('/dashboard');
+
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -27,7 +41,6 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#F8F8F6] px-4">
       <div className="w-full max-w-sm">
 
-        {/* Logo */}
         <div className="flex items-center gap-2 justify-center mb-8">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#1D9E75' }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="1.5">
@@ -37,16 +50,13 @@ export default function LoginPage() {
           <span className="font-display text-lg text-slate-800">Career Coach</span>
         </div>
 
-        {/* Card */}
         <div className="bg-white border border-slate-100 rounded-2xl p-8">
           <h1 className="text-xl font-medium text-slate-800 mb-1">Welcome back</h1>
           <p className="text-sm text-slate-500 mb-6">Sign in to your Career Coach account</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-slate-600 mb-1.5 block">
-                Email
-              </label>
+              <label className="text-xs font-medium text-slate-600 mb-1.5 block">Email</label>
               <input
                 name="email"
                 type="email"
@@ -57,9 +67,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-600 mb-1.5 block">
-                Password
-              </label>
+              <label className="text-xs font-medium text-slate-600 mb-1.5 block">Password</label>
               <input
                 name="password"
                 type="password"
